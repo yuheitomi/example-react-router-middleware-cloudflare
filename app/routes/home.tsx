@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
 import { Welcome } from "../welcome/welcome";
 import { CloudflareContext } from "workers/app";
+import { unstable_createContext } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,8 +10,19 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+const UserContext = unstable_createContext<{ user: { id: string } }>();
+
+const authMiddleware: Route.unstable_MiddlewareFunction = async ({ request, context }) => {
+  const user = { id: "12345" };
+  context.set(UserContext, { user });
+}
+
+export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [authMiddleware];
+
 export function loader({ context }: Route.LoaderArgs) {
   const cfContext = context.get(CloudflareContext);
+  const { user } = context.get(UserContext);
+  console.log(`User ID: ${user.id}`)
   return { message: cfContext.cloudflare.env.VALUE_FROM_CLOUDFLARE };
 }
 
