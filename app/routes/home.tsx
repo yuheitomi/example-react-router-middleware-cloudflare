@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import { Welcome } from "../welcome/welcome";
+import { CloudflareContext } from "workers/app";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,7 +10,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export function loader({ context }: Route.LoaderArgs) {
-  return { message: context.cloudflare.env.VALUE_FROM_CLOUDFLARE };
+  const cfContext = context.get(CloudflareContext);
+  return { message: cfContext.cloudflare.env.VALUE_FROM_CLOUDFLARE };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
