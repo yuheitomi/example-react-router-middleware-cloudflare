@@ -1,33 +1,33 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { env } from "cloudflare:workers";
+import { createContext } from "react-router";
 import { CloudflareContext } from "workers/app";
-import { unstable_createContext } from "react-router";
-import { env } from "cloudflare:workers"
+import { Welcome } from "../welcome/welcome";
+import type { Route } from "./+types/home";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+export function meta() {
+	return [
+		{ title: "New React Router App" },
+		{ name: "description", content: "Welcome to React Router!" },
+	];
 }
 
-const UserContext = unstable_createContext<{ user: { id: string } }>();
+const UserContext = createContext<{ user: { id: string } }>();
 
-const authMiddleware: Route.unstable_MiddlewareFunction = async ({ request, context }) => {
-  const user = { id: "12345" };
-  context.set(UserContext, { user });
-}
+const authMiddleware: Route.MiddlewareFunction = async ({ context }) => {
+	const user = { id: "12345" };
+	context.set(UserContext, { user });
+};
 
-export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [authMiddleware];
+export const middleware: Route.MiddlewareFunction[] = [authMiddleware];
 
 export function loader({ context }: Route.LoaderArgs) {
-  const cfContext = context.get(CloudflareContext);
-  const { user } = context.get(UserContext);
-  console.log(`User ID: ${user.id}`)
-  console.log(env.VALUE_FROM_CLOUDFLARE); // you can instead refer to the env directly
-  return { message: cfContext.cloudflare.env.VALUE_FROM_CLOUDFLARE };
+	const cfContext = context.get(CloudflareContext);
+	const { user } = context.get(UserContext);
+	console.log(`User ID: ${user.id}`);
+	console.log(env.VALUE_FROM_CLOUDFLARE); // you can instead refer to the env directly
+	return { message: cfContext.cloudflare.env.VALUE_FROM_CLOUDFLARE };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  return <Welcome message={loaderData.message} />;
+	return <Welcome message={loaderData.message} />;
 }
