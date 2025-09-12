@@ -2,6 +2,7 @@ import type { Route } from "./+types/home";
 import { Welcome } from "../welcome/welcome";
 import { CloudflareContext } from "workers/app";
 import { unstable_createContext } from "react-router";
+import { env } from "cloudflare:workers"
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -23,6 +24,7 @@ export function loader({ context }: Route.LoaderArgs) {
   const cfContext = context.get(CloudflareContext);
   const { user } = context.get(UserContext);
   console.log(`User ID: ${user.id}`)
+  console.log(env.VALUE_FROM_CLOUDFLARE); // you can instead refer to the env directly
   return { message: cfContext.cloudflare.env.VALUE_FROM_CLOUDFLARE };
 }
 
